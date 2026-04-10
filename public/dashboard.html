@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Dashboard | CareerMitra AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --glass: rgba(255, 255, 255, 0.7);
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body { 
+            margin: 0;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            min-height: 100vh; 
+            font-family: 'Poppins', sans-serif; 
+            color: #1e293b;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .glass-card:hover { transform: translateY(-5px); }
+
+        .dash-header { text-align: center; color: white; padding: 40px 0; animation: fadeInDown 0.8s ease; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-val { font-size: 2.5rem; font-weight: 600; color: var(--primary); }
+
+        .btn-pro {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .btn-pro:hover { background: #4f46e5; box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4); }
+
+        /* Roadmap Styling */
+        .roadmap-container { margin-top: 20px; display: none; }
+        .roadmap-step {
+            border-left: 3px solid var(--primary);
+            padding-left: 20px;
+            margin-left: 10px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .roadmap-step::before {
+            content: ''; position: absolute; left: -9px; top: 0;
+            width: 15px; height: 15px; background: white;
+            border: 3px solid var(--primary); border-radius: 50%;
+        }
+
+        /* File Upload Styling */
+        #dropZone {
+            border: 2px dashed rgba(99, 102, 241, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.3);
+            transition: 0.3s;
+        }
+        #dropZone:hover { background: rgba(255,255,255,0.5); }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="dash-header">
+        <h1 id="welcomeText"><i class="fas fa-sparkles"></i> Hello, Tanaya!</h1>
+        <p>Your AI-Powered Career Path is ready.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="glass-card">
+            <div class="stat-val" id="totalSteps">05</div>
+            <p><i class="fas fa-map-signs"></i> Goal Milestones</p>
+        </div>
+        <div class="glass-card">
+            <div class="stat-val" id="progressPercent">0%</div>
+            <p><i class="fas fa-chart-line"></i> Profile Readiness</p>
+        </div>
+        <div class="glass-card">
+            <div class="stat-val" id="branchText">CSE</div>
+            <p><i class="fas fa-user-graduate"></i> Academic Focus</p>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+        
+        <div class="glass-card">
+            <h3><i class="fas fa-robot"></i> AI Career Mentor</h3>
+            <p>Smart chat for career guidance & skill queries.</p>
+            <button class="btn-pro" onclick="location.href='ai.html'">Start Chatting</button>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fas fa-route"></i> Roadmap Builder</h3>
+            <input type="text" id="targetGoal" placeholder="Target Role (e.g. Java Developer)" 
+                style="width:90%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #ddd;">
+            <button class="btn-pro" id="genBtn" onclick="generateRoadmap()">Generate Real Roadmap</button>
+            
+            <div id="roadmapOutput" class="roadmap-container">
+                </div>
+        </div>
+
+        <div class="glass-card">
+            <h3><i class="fas fa-file-pdf"></i> Pro Resume Scorer</h3>
+            <p>Upload your PDF for a deep AI scan.</p>
+            
+            <div id="dropZone">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--primary);"></i>
+                <p id="fileName">Click or Drag PDF here</p>
+                <input type="file" id="resumeFile" accept=".pdf" style="display: none;">
+            </div>
+
+            <button class="btn-pro" onclick="uploadResume()" id="upBtn">Analyze PDF</button>
+            <div id="resOutput" style="margin-top: 15px; display: none;"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- 🪄 INITIALIZATION ---
+    window.onload = () => {
+        const user = JSON.parse(localStorage.getItem("user") || '{"name":"Tanaya","branch":"CSE"}');
+        document.getElementById("welcomeText").innerHTML = `<i class="fas fa-rocket"></i> Welcome, ${user.name}!`;
+        document.getElementById("branchText").innerText = user.branch;
+        animateValue("progressPercent", 0, 75, 1500); 
+    };
+
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        let range = end - start;
+        let stepTime = Math.max(Math.floor(duration / range), 50);
+        let startTime = new Date().getTime();
+        let endTime = startTime + duration;
+        let timer = setInterval(() => {
+            let now = new Date().getTime();
+            let remaining = Math.max((endTime - now) / duration, 0);
+            let value = Math.round(end - (remaining * range));
+            obj.innerHTML = value + "%";
+            if (value == end) clearInterval(timer);
+        }, stepTime);
+    }
+
+    // --- 🗺️ ROADMAP LOGIC ---
+    async function generateRoadmap() {
+        const goal = document.getElementById("targetGoal").value;
+        const out = document.getElementById("roadmapOutput");
+        const btn = document.getElementById("genBtn");
+
+        if(!goal) return alert("Pehle goal likhein!");
+
+        out.style.display = "block";
+        out.innerHTML = "<p><i class='fas fa-sync fa-spin'></i> AI is drafting your roadmap...</p>";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/api/ai/generate-roadmap', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ careerGoal: goal })
+            });
+            const data = await response.json();
+            
+            if(data.success) {
+                let stepsHTML = `<h4>${data.roadmap.title}</h4>`;
+                data.roadmap.steps.forEach(step => {
+                    stepsHTML += `
+                        <div class="roadmap-step">
+                            <strong>${step.phase}</strong>
+                            <p style="font-size:0.85rem; margin:5px 0;">${step.description}</p>
+                        </div>`;
+                });
+                stepsHTML += `<p style="color:var(--primary); font-size:0.8rem;">💡 ${data.roadmap.tip}</p>`;
+                out.innerHTML = stepsHTML;
+            }
+        } catch (err) {
+            out.innerHTML = "<p style='color:red'>Backend error! Check server connection.</p>";
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // --- 📄 RESUME UPLOAD LOGIC ---
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('resumeFile');
+    
+    dropZone.onclick = () => fileInput.click();
+    fileInput.onchange = () => {
+        if(fileInput.files.length > 0)
+            document.getElementById('fileName').innerText = fileInput.files[0].name;
+    };
+
+    async function uploadResume() {
+        const file = fileInput.files[0];
+        const btn = document.getElementById('upBtn');
+        const out = document.getElementById('resOutput');
+
+        if(!file) return alert("Pehle PDF select karein!");
+
+        btn.innerText = "Analyzing Resume...";
+        btn.disabled = true;
+        const formData = new FormData();
+        formData.append('resume', file);
+
+        try {
+            const res = await fetch('/api/ai/resume-upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            out.style.display = "block";
+            out.innerHTML = `
+                <div style="background:white; padding:15px; border-radius:12px; border:2px solid var(--primary);">
+                    <h3 style="margin:0; color:var(--primary);">Score: ${data.score}/100</h3>
+                    <p style="font-size:0.9rem; font-weight:bold; margin:10px 0;">${data.feedback}</p>
+                    <ul style="padding-left:15px; font-size:0.8rem; color:#444;">
+                        ${data.bullets.map(b => `<li style="margin-bottom:5px;">${b}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        } catch (e) {
+            alert("Upload failed. Make sure backend is running!");
+        } finally {
+            btn.innerText = "Analyze PDF";
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>

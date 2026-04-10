@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mentor | CareerMitra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg); 
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        /* Glassmorphism Container */
+        .chat-container { 
+            width: 90%; 
+            max-width: 500px; 
+            height: 80vh; 
+            background: rgba(255, 255, 255, 0.15); 
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .chat-header { 
+            padding: 20px; 
+            background: rgba(255, 255, 255, 0.1); 
+            color: white; 
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #chatBox { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+        }
+
+        /* Modern Bubbles */
+        .message { 
+            padding: 12px 18px; 
+            border-radius: 20px; 
+            max-width: 85%; 
+            font-size: 0.95rem;
+            line-height: 1.4;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-msg { 
+            align-self: flex-end; 
+            background: var(--primary); 
+            color: white; 
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-msg { 
+            align-self: flex-start; 
+            background: rgba(255, 255, 255, 0.9); 
+            color: #333; 
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Typing Loader */
+        .typing { font-size: 0.8rem; color: #ddd; margin-bottom: 10px; display: none; }
+
+        .input-area { 
+            padding: 20px; 
+            background: rgba(255,255,255,0.1); 
+            display: flex; 
+            gap: 10px;
+        }
+
+        input { 
+            flex: 1; 
+            background: rgba(255,255,255,0.2); 
+            border: 1px solid rgba(255,255,255,0.3); 
+            padding: 12px 20px; 
+            border-radius: 25px; 
+            color: white; 
+            outline: none;
+        }
+
+        input::placeholder { color: #ddd; }
+
+        button { 
+            background: white; 
+            color: var(--primary); 
+            border: none; 
+            padding: 0 20px; 
+            border-radius: 25px; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { transform: scale(1.05); background: var(--primary); color: white; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h3><i class="fas fa-robot"></i> CareerMitra AI</h3>
+        <span style="font-size: 0.8rem; opacity: 0.8;">Online | Always here to help</span>
+    </div>
+
+    <div id="chatBox">
+        <div class="message ai-msg">Namaste! Main CareerMitra AI hoon. Aaj aap apne career ke baare mein kya jaanna chahte hain?</div>
+    </div>
+
+    <div id="typing" class="typing" style="padding: 0 20px;"><i class="fas fa-pen"></i> AI is thinking...</div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<script>
+    async function sendMessage() {
+        const input = document.getElementById("userInput");
+        const chatBox = document.getElementById("chatBox");
+        const typing = document.getElementById("typing");
+        const text = input.value.trim();
+
+        if (!text) return;
+
+        // User Message
+        chatBox.innerHTML += `<div class="message user-msg">${text}</div>`;
+        input.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Show Loading
+        typing.style.display = "block";
+
+        try {
+            const response = await fetch('/api/ai/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: text })
+            });
+            const data = await response.json();
+
+            // AI Message
+            typing.style.display = "none";
+            chatBox.innerHTML += `<div class="message ai-msg">${data.response}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            typing.style.display = "none";
+            chatBox.innerHTML += `<div class="message ai-msg" style="color:red">Oops! Connection problem. Try again.</div>`;
+        }
+    }
+</script>
+
+</body>
+</html>

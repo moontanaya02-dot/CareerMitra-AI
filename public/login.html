@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | CareerMitra AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .auth-logo { font-size: 2rem; margin-bottom: 10px; }
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; background: #f1f5f9; padding: 5px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; cursor: pointer; border-radius: 8px; font-weight: 600; transition: 0.3s; color: #64748b; }
+        .tab-btn.active { background: white; color: #6366f1; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        .input-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .input-group i { position: absolute; left: 15px; top: 15px; color: #94a3b8; }
+        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.3s; box-sizing: border-box; }
+        .input-group input:focus { border-color: #6366f1; }
+        
+        .auth-btn { width: 100%; padding: 14px; background: #6366f1; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .auth-btn:hover { background: #4f46e5; transform: translateY(-2px); }
+        
+        #registerFields { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">🚀</div>
+            <h2 id="authTitle">Welcome Back!</h2>
+            <p id="authSubtitle" style="color: #64748b; margin-bottom: 25px;">Login to access your AI dashboard</p>
+
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="toggleAuth('login')">Login</button>
+                <button class="tab-btn" onclick="toggleAuth('register')">Register</button>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="input-group" id="nameGroup" style="display: none;">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="name" placeholder="Full Name">
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+
+                <button type="submit" class="auth-btn" id="submitBtn">Login Now</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'login';
+
+        function toggleAuth(mode) {
+            currentMode = mode;
+            const nameGroup = document.getElementById('nameGroup');
+            const submitBtn = document.getElementById('submitBtn');
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const tabs = document.querySelectorAll('.tab-btn');
+
+            if (mode === 'register') {
+                nameGroup.style.display = 'block';
+                submitBtn.innerText = 'Create Account';
+                title.innerText = 'Join CareerMitra';
+                subtitle.innerText = 'Start your AI journey today';
+                tabs[1].classList.add('active');
+                tabs[0].classList.remove('active');
+            } else {
+                nameGroup.style.display = 'none';
+                submitBtn.innerText = 'Login Now';
+                title.innerText = 'Welcome Back!';
+                subtitle.innerText = 'Login to access your AI dashboard';
+                tabs[0].classList.add('active');
+                tabs[1].classList.remove('active');
+            }
+        }
+
+        async function handleAuth(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const endpoint = currentMode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+            const payload = currentMode === 'login' ? { email, password } : { name, email, password };
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // Save user data
+                    localStorage.setItem("user", JSON.stringify(data.student || data.user));
+                    alert(currentMode === 'login' ? "Login Successful! 🎉" : "Registration Successful! Please Login.");
+                    
+                    if(currentMode === 'login') {
+                        window.location.href = "dashboard.html";
+                    } else {
+                        toggleAuth('login');
+                    }
+                } else {
+                    alert("⚠️ " + data.msg);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Server Connection Failed!");
+            }
+        }
+    </script>
+</body>
+</html>

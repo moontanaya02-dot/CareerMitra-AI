@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Careers | CareerMitra AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .explore-hero { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 60px 20px; text-align: center; }
+        .career-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; padding: 40px 10%; }
+        .career-card { background: white; border-radius: 20px; padding: 30px; text-align: center; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #e2e8f0; }
+        .career-card:hover { transform: translateY(-10px); border-color: #6366f1; box-shadow: 0 15px 30px rgba(99, 102, 241, 0.1); }
+        .career-card i { font-size: 3rem; color: #6366f1; margin-bottom: 20px; }
+        .career-card h3 { margin: 10px 0; color: #1e293b; }
+        .career-card p { color: #64748b; font-size: 0.9rem; }
+        .badge { background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 10px; display: inline-block; }
+    </style>
+</head>
+<body style="background: #f8fafc; margin: 0;">
+
+    <div class="explore-hero">
+        <h1>🔍 Explore Your Career Path</h1>
+        <p>Discover roles, market trends, and hidden opportunities.</p>
+    </div>
+
+    <div class="career-grid">
+        <div class="career-card" onclick="exploreField('Software Engineering')">
+            <span class="badge">Trending</span>
+            <i class="fas fa-laptop-code"></i>
+            <h3>Developer</h3>
+            <p>Build the future with code. High demand in AI, Web, and Mobile.</p>
+        </div>
+
+        <div class="career-card" onclick="exploreField('Medical Science')">
+            <span class="badge">Noble</span>
+            <i class="fas fa-user-md"></i>
+            <h3>Doctor</h3>
+            <p>Save lives and innovate in healthcare. Stability and high impact.</p>
+        </div>
+
+        <div class="career-card" onclick="exploreField('Data Science & Analytics')">
+            <span class="badge">High Growth</span>
+            <i class="fas fa-chart-pie"></i>
+            <h3>Analyst</h3>
+            <p>Turn data into decisions. Perfect for logical and curious minds.</p>
+        </div>
+
+        <div class="career-card" onclick="exploreField('UI/UX Design')">
+            <span class="badge">Creative</span>
+            <i class="fas fa-palette"></i>
+            <h3>Designer</h3>
+            <p>Create intuitive experiences. Where art meets technology.</p>
+        </div>
+    </div>
+
+    <div id="aiInsights" style="max-width: 900px; margin: 20px auto; display: none;" class="fade-in">
+        <div style="background: white; padding: 30px; border-radius: 20px; border-left: 6px solid #6366f1; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+            <h3 id="fieldTitle" style="color: #6366f1;"></h3>
+            <div id="aiText" style="line-height: 1.6; color: #334155;"></div>
+            <button class="btn-primary" style="margin-top: 20px;" onclick="window.location.href='dashboard.html'">Get Roadmap for this</button>
+        </div>
+    </div>
+
+    <script>
+        async function exploreField(fieldName) {
+            const insightBox = document.getElementById("aiInsights");
+            const aiText = document.getElementById("aiText");
+            const fieldTitle = document.getElementById("fieldTitle");
+
+            insightBox.style.display = "block";
+            fieldTitle.innerText = `AI Insights: ${fieldName}`;
+            aiText.innerHTML = "✨ Gemini is fetching latest market trends for you...";
+            
+            // UI Scroll to insight
+            insightBox.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                // Backend ko call kar sakte hain for specific career info
+                const res = await fetch("/api/ai/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: `Briefly explain the career scope and top 3 skills needed for ${fieldName} in 2026.` })
+                });
+                const data = await res.json();
+                aiText.innerHTML = data.response;
+            } catch (e) {
+                aiText.innerHTML = "⚠️ AI is busy. But trust us, this field has great scope!";
+            }
+        }
+    </script>
+</body>
+</html>

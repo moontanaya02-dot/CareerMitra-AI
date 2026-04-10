@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career AI | Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --p: #6366f1; --bg: #f8fafc; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* Chat Interface */
+        .chat-container { flex: 1; display: flex; flex-direction: column; max-width: 900px; margin: 20px auto; width: 95%; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; }
+        #chatBox { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #ffffff; }
+        
+        /* Message Styles */
+        .msg { padding: 12px 18px; border-radius: 15px; max-width: 80%; line-height: 1.5; font-size: 0.95rem; }
+        .user-msg { align-self: flex-end; background: var(--p); color: white; border-bottom-right-radius: 2px; }
+        .ai-msg { align-self: flex-start; background: #f1f5f9; color: #1e293b; border-bottom-left-radius: 2px; border-left: 4px solid var(--p); }
+        
+        /* Input Area */
+        .input-area { padding: 20px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; }
+        input { flex: 1; padding: 15px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--p); }
+        button { padding: 0 25px; background: var(--p); color: white; border: none; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Typing Animation */
+        .typing { font-size: 0.8rem; color: #64748b; margin-bottom: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div id="chatBox">
+            <div class="msg ai-msg">Hello Tanaya! 👋 I'm your Career AI. Ask me anything about jobs, skills, or roadmaps.</div>
+        </div>
+        
+        <div id="typingIndicator" class="typing" style="padding-left: 25px;">
+            <i class="fas fa-robot"></i> Career AI is thinking...
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userQuestion" placeholder="Ask your career doubt..." onkeypress="if(event.key === 'Enter') askAI()">
+            <button id="sendBtn" onclick="askAI()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function askAI() {
+            const input = document.getElementById("userQuestion");
+            const chatBox = document.getElementById("chatBox");
+            const sendBtn = document.getElementById("sendBtn");
+            const typingIndicator = document.getElementById("typingIndicator");
+            
+            const question = input.value.trim();
+            if (!question) return;
+
+            // 1. Show user message
+            appendMessage("user-msg", `<b>You:</b> ${question}`);
+            input.value = "";
+            
+            // 2. UI State Change
+            input.disabled = true;
+            sendBtn.disabled = true;
+            typingIndicator.style.display = "block";
+            autoScroll();
+
+            try {
+                // 3. API Call
+                const res = await fetch("/api/ai/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: question })
+                });
+
+                const data = await res.json();
+
+                // 4. Show AI Response
+                if (data.success) {
+                    appendMessage("ai-msg", `<b>AI:</b> ${data.response}`);
+                } else {
+                    throw new Error();
+                }
+
+            } catch (e) {
+                appendMessage("ai-msg", `<span style="color: red;">⚠️ Sorry Tanaya, my brain is a bit tired. Let's try again?</span>`);
+            } finally {
+                // 5. Reset UI
+                input.disabled = false;
+                sendBtn.disabled = false;
+                typingIndicator.style.display = "none";
+                input.focus();
+                autoScroll();
+            }
+        }
+
+        function appendMessage(className, text) {
+            const chatBox = document.getElementById("chatBox");
+            const div = document.createElement("div");
+            div.className = `msg ${className}`;
+            div.innerHTML = text;
+            chatBox.appendChild(div);
+        }
+
+        function autoScroll() {
+            const chatBox = document.getElementById("chatBox");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
